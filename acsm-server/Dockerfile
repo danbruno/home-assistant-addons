@@ -12,7 +12,7 @@ RUN \
 # Execute during the build of the image
 RUN \
     curl -sSLf -o / \
-    "https://github.com/dan.bruno/home-assistant-repository/acsm-server/"
+    "https://github.com/danbruno/home-assistant-repository/acsm-server/"
 
 WORKDIR /data
 
