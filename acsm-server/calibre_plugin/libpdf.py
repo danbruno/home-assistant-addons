@@ -1,19 +1,23 @@
 '''
 Copyright (c) 2021-2023 Leseratte10
 This file is part of the ACSM Input Plugin by Leseratte10
-ACSM Input Plugin for Calibre / acsm-calibre-plugin
+ACSM Input Plugin for Calibre / acsm-calibre_plugin
 
 For more information, see: 
 https://github.com/Leseratte10/acsm-calibre-plugin
 '''
 
-import sys, os, zlib, base64, time
+import base64
+import os
+import sys
+import time
+import zlib
+
 
 class BackwardReader:
 
     def __init__(self, file):
         self.file = file
-
 
     def readlines(self):
         BLKSIZE = 4096
@@ -34,7 +38,7 @@ class BackwardReader:
             current_pos = self.file.tell()
             if pos_newline != -1:
                 # Newline is found
-                line = buffer[pos_newline+1:]
+                line = buffer[pos_newline + 1:]
                 buffer = buffer[:pos_newline]
                 if sys.version_info[0] >= 3:
                     yield line.decode("latin-1")
@@ -44,9 +48,9 @@ class BackwardReader:
             elif current_pos:
                 # Need to fill the buffer
                 to_read = min(BLKSIZE, current_pos)
-                self.file.seek(current_pos-to_read, 0)
+                self.file.seek(current_pos - to_read, 0)
                 buffer = self.file.read(to_read) + buffer
-                self.file.seek(current_pos-to_read, 0)
+                self.file.seek(current_pos - to_read, 0)
                 if current_pos is to_read:
                     if sys.version_info[0] >= 3:
                         buffer = bytes([0x0a]) + buffer
@@ -57,33 +61,30 @@ class BackwardReader:
                 return
 
 
-
-
 def trim_encrypt_string(encrypt):
-
     string_list = list(encrypt)
     strlen = len(encrypt)
 
     i = 0
     bracket_count = 0
     while (i < strlen):
-        if string_list[i] == "<" and string_list[i+1] == "<":
+        if string_list[i] == "<" and string_list[i + 1] == "<":
             bracket_count += 1
 
-        if string_list[i] == ">" and string_list[i+1] == ">":
+        if string_list[i] == ">" and string_list[i + 1] == ">":
             bracket_count -= 1
 
-        if bracket_count == 0: 
+        if bracket_count == 0:
             break
 
         i = i + 1
 
-    len_to_use = i+2
+    len_to_use = i + 2
 
     return encrypt[0:len_to_use]
 
-def cleanup_encrypt_element(element):
 
+def cleanup_encrypt_element(element):
     if element.startswith("ID[<"):
         element = element.replace("><", "> <")
 
@@ -93,15 +94,13 @@ def cleanup_encrypt_element(element):
     return element
 
 
-
-
-def deflate_and_base64_encode( string_val ):
-    zlibbed_str = zlib.compress( string_val )
+def deflate_and_base64_encode(string_val):
+    zlibbed_str = zlib.compress(string_val)
     compressed_string = zlibbed_str[2:-4]
-    return base64.b64encode( compressed_string )
+    return base64.b64encode(compressed_string)
+
 
 def update_ebx_with_keys(ebx_data, adept_license, ebx_bookid):
-
     b64data = deflate_and_base64_encode(adept_license.encode("utf-8")).decode("utf-8")
 
     ebx_new = ebx_data[:-2]
@@ -110,11 +109,11 @@ def update_ebx_with_keys(ebx_data, adept_license, ebx_bookid):
     return ebx_new
 
 
-def find_ebx(filename_in):
+def find_ebx(file_in):
     find_ebx_start = int(time.time() * 1000)
     i = 0
 
-    fl = open(filename_in, "rb")
+    fl = open(file_in, "rb")
     br = BackwardReader(fl)
 
     for line in br.readlines():
@@ -128,11 +127,12 @@ def find_ebx(filename_in):
     print("Error: Did not find EBX_HANDLER - took %d ms" % (find_ebx_end - find_ebx_start))
     return None
 
-def find_enc(filename_in):
+
+def find_enc(file_in):
     find_enc_start = int(time.time() * 1000)
     i = 0
 
-    fl = open(filename_in, "rb")
+    fl = file_in
     br = BackwardReader(fl)
 
     for line in br.readlines():
@@ -146,17 +146,15 @@ def find_enc(filename_in):
             if is_encrypt_odd:
                 print("Odd formatting of encryption blob?")
                 print("If this doesn't work correctly please open a bug report.")
-                
+
             return line
-    
+
     find_enc_end = int(time.time() * 1000)
     print("Error: Did not find ENC - took %d ms" % (find_enc_end - find_enc_start))
     return None
 
 
-
-def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_bookid):
-
+def patch_drm_into_pdf(file_in, adept_license_string, file_out, ebx_bookid):
     drm_start_time = int(time.time() * 1000)
 
     trailer = ""
@@ -165,8 +163,7 @@ def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_book
     startxref_offset = 0
     prevline = ""
 
-
-    fl = open(filename_in, "rb")
+    fl = file_in
     br = BackwardReader(fl)
 
     print("Searching for startxref ...")
@@ -174,27 +171,24 @@ def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_book
         trailer_idx += 1
         trailer = line + "\n" + trailer
 
-        #print ("LINE: " + line)
+        # print ("LINE: " + line)
 
         if (trailer_idx > 10):
             print("Took more than 10 attempts to find startxref ...")
             return False
-        
+
         if (line == "startxref"):
             startxref_offset = int(prevline)
-            print("Got startxref: %d" % (startxref_offset))            
+            print("Got startxref: %d" % (startxref_offset))
             break
         prevline = line
-
-
 
     r_encrypt_offs1 = 0
     r_encrypt_offs2 = 0
 
     encrypt = None
 
-
-    encrypt = find_enc(filename_in)
+    encrypt = find_enc(file_in)
     if encrypt is None:
         print("Error, enc not found")
         return False
@@ -209,20 +203,18 @@ def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_book
             r_encrypt_offs1 = element
             next = 1
             continue
-        if next == 1: 
+        if next == 1:
             r_encrypt_offs2 = element
             next = 0
             continue
 
-
     # read EBX element:
-    ebx_elem = find_ebx(filename_in)
-    
-    if (ebx_elem is None):
+    ebx_elem = find_ebx(file_in)
+
+    if ebx_elem is None:
         print("Err: EBX is None")
         return False
 
-    
     print("")
     print("")
     print("Encryption handler:")
@@ -238,12 +230,12 @@ def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_book
     ebx_elem = update_ebx_with_keys(ebx_elem, adept_license_string, ebx_bookid)
 
     print("Updated EBX handler not logged due to sensitive data")
-    #print(ebx_elem)
-        
+    # print(ebx_elem)
 
-    filesize_str = str(os.path.getsize(filename_in))
+    file = open(file_in)
+    file.seek(0, os.SEEK_END)
+    filesize_str = str(file.tell())
     filesize_pad = filesize_str.zfill(10)
-
 
     additional_data = "\r"
     additional_data += r_encrypt_offs1 + " " + r_encrypt_offs2 + " " + "obj" + "\r"
@@ -260,11 +252,11 @@ def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_book
 
     arr_root_str = encrypt.split('/')
     did_prev = False
-    for elem in arr_root_str: 
+    for elem in arr_root_str:
         if elem.startswith("Prev"):
             did_prev = True
             additional_data += "Prev " + str(startxref_offset)
-            #print("Replacing prev from '%s' to '%s'" % (elem, "Prev " + startxref))
+            # print("Replacing prev from '%s' to '%s'" % (elem, "Prev " + startxref))
         else:
             additional_data += cleanup_encrypt_element(elem)
         additional_data += "/"
@@ -273,18 +265,17 @@ def patch_drm_into_pdf(filename_in, adept_license_string, filename_out, ebx_book
         # remove two >> at end
         additional_data = additional_data[:-3]
         additional_data += "/Prev " + str(startxref_offset) + ">>" + "/"
-        #print("Faking Prev %s" % startxref)
+        # print("Faking Prev %s" % startxref)
 
     additional_data = additional_data[:-1]
 
     additional_data += "\r" + "startxref\r" + str(ptr) + "\r" + "%%EOF"
 
-    #print("Appending DRM data: %s" % (additional_data))
+    # print("Appending DRM data: %s" % (additional_data))
 
+    inp = file_in
 
-    inp = open(filename_in, "rb")
-
-    out = open(filename_out, "wb")
+    out = file_out
     out.write(inp.read())
     out.write(additional_data.encode("latin-1"))
     inp.close()

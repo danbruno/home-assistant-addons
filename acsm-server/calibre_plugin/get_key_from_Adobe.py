@@ -4,9 +4,9 @@
 '''
 Copyright (c) 2021-2023 Leseratte10
 This file is part of the ACSM Input Plugin by Leseratte10
-ACSM Input Plugin for Calibre / acsm-calibre-plugin
+ACSM Input Plugin for Calibre / acsm-calibre_plugin
 
-For more information, see: 
+For more information, see:
 https://github.com/Leseratte10/acsm-calibre-plugin
 '''
 
@@ -23,7 +23,8 @@ just run it once and then make enough backups of the key file.
 
 '''
 
-import sys, getpass, tempfile
+import sys
+import tempfile
 
 if sys.version_info[0] < 3:
     print("This script requires Python 3.")
@@ -32,80 +33,55 @@ if sys.version_info[0] < 3:
 from libadobe import createDeviceKeyFile, update_account_path, VAR_VER_SUPP_CONFIG_NAMES
 from libadobeAccount import createDeviceFile, createUser, signIn, exportAccountEncryptionKeyDER, getAccountUUID
 
-# These are the only two variables you'll need to change
-# The mail address and password of your Adobe account 
-
-VAR_MAIL = ""
-VAR_PASS = ""
-VAR_VER = None # 1 for ADE2.0.1, 2 for ADE3.0.1
 
 #################################################################
 
-def main():
-    global VAR_MAIL
-    global VAR_PASS
-    global VAR_VER
-
-    if (VAR_MAIL == ""):
-        VAR_MAIL = input("Please enter your AdobeID: ")
-    
-    if (VAR_PASS == ""):
-        VAR_PASS = getpass.getpass("Please enter the password for your AdobeID: ")
-
-    if (VAR_VER is None):
-        VAR_VER = int(input("Please enter '1' for ADE 2.0 or '2' for ADE 3.0: "))
-
-    if VAR_VER >= len(VAR_VER_SUPP_CONFIG_NAMES):
+def exportKey(adobe_id, password, version):
+    if version is None or version >= len(VAR_VER_SUPP_CONFIG_NAMES):
         print("Invalid version")
-        exit(1)
+        return
 
-    if (VAR_MAIL == "" or VAR_PASS == ""):
+    if adobe_id is None or adobe_id == "" or password is None or password == "":
         print("Empty credential, aborting")
-        exit(1)
+        return
 
-    filename = "adobekey_" + VAR_MAIL + ".der"
+    filename = "adobekey_" + adobe_id + ".der"
 
     with tempfile.TemporaryDirectory() as temp_dir:
         update_account_path(temp_dir)
 
-        print ("Preparing keys ...")
+        print("Preparing keys ...")
 
         createDeviceKeyFile()
-        success = createDeviceFile(True, VAR_VER)
-        if (success is False):
+        success = createDeviceFile(True, version)
+        if success is False:
             print("Error, couldn't create device file.")
             exit(1)
 
-
-        success, resp = createUser(VAR_VER, None)
-        if (success is False):
+        success, resp = createUser(version, None)
+        if success is False:
             print("Error, couldn't create user: %s" % resp)
             exit(1)
 
         print("Logging in ...")
 
-        success, resp = signIn("AdobeID", VAR_MAIL, VAR_PASS)
-        if (success is False):
+        success, resp = signIn("AdobeID", adobe_id, password)
+        if success is False:
             print("Login unsuccessful: " + resp)
             exit(1)
 
         print("Exporting keys ...")
 
-        try: 
+        try:
             account_uuid = getAccountUUID()
-            if (account_uuid is not None):
-                filename = "adobekey_" + VAR_MAIL + "_uuid_" + account_uuid + ".der"
-        except: 
+            if account_uuid is not None:
+                filename = "adobekey_" + adobe_id + "_uuid_" + account_uuid + ".der"
+        except:
             pass
 
         success = exportAccountEncryptionKeyDER(filename)
-        if (success is False):
+        if success is False:
             print("Couldn't export key.")
             exit(1)
 
-
-    print("Successfully exported key for account " + VAR_MAIL + " to file " + filename)
-
-
-if __name__ == "__main__":
-    main()
+    print("Successfully exported key for account " + adobe_id + " to file " + filename)

@@ -4,7 +4,7 @@
 '''
 Copyright (c) 2021-2023 Leseratte10
 This file is part of the ACSM Input Plugin by Leseratte10
-ACSM Input Plugin for Calibre / acsm-calibre-plugin
+ACSM Input Plugin for Calibre / acsm-calibre_plugin
 
 For more information, see: 
 https://github.com/Leseratte10/acsm-calibre-plugin
@@ -14,57 +14,39 @@ https://github.com/Leseratte10/acsm-calibre-plugin
 Helper library with code needed for Adobe stuff.
 '''
 
-from uuid import getnode
-import sys, os, hashlib, base64
+import base64
+import hashlib
+import os
 import ssl
-try: 
-    import urllib.request as ulib
-    import urllib.error as uliberror
-except: 
-    import urllib2 as ulib
-    import urllib2 as uliberror
-
+import sys
+import urllib.error as uliberror
+import urllib.request as ulib
 from datetime import datetime, timedelta
+from uuid import getnode
 
+from Cryptodome import Random
+from Cryptodome.Cipher import AES
+from Cryptodome.Hash import SHA
 from lxml import etree
-
-try:
-    from Cryptodome import Random
-    from Cryptodome.Cipher import AES
-    from Cryptodome.Hash import SHA
-
-except ImportError:
-    # Some distros still ship Crypto
-    from Crypto import Random
-    from Crypto.Cipher import AES
-    from Crypto.Hash import SHA
-
-
-#@@CALIBRE_COMPAT_CODE@@
-
-
-from customRSA import CustomRSA
-
 from oscrypto import keys
 from oscrypto.asymmetric import dump_certificate, dump_private_key
 
+from calibre_plugin.customRSA import CustomRSA
 
 VAR_ACS_SERVER_HTTP = "http://adeactivate.adobe.com/adept"
 VAR_ACS_SERVER_HTTPS = "https://adeactivate.adobe.com/adept"
 
-FILE_DEVICEKEY = "devicesalt"
-FILE_DEVICEXML = "device.xml"
-FILE_ACTIVATIONXML = "activation.xml"
-
+FILE_DEVICEKEY = "C:/docker/acsm-server/devicesalt"
+FILE_DEVICEXML = "C:/docker/acsm-server/device.xml"
+FILE_ACTIVATIONXML = "C:/docker/acsm-server/activation.xml"
 
 # Lists of different ADE "versions" we know about
-VAR_VER_SUPP_CONFIG_NAMES = [ "ADE 1.7.2", "ADE 2.0.1", "ADE 3.0.1", "ADE 4.0.3", "ADE 4.5.10", "ADE 4.5.11" ]
-VAR_VER_SUPP_VERSIONS = [ "ADE WIN 9,0,1131,27", "2.0.1.78765", "3.0.1.91394", "4.0.3.123281", 
-                            "com.adobe.adobedigitaleditions.exe v4.5.10.186048", 
-                            "com.adobe.adobedigitaleditions.exe v4.5.11.187303" ]
-VAR_VER_HOBBES_VERSIONS = [ "9.0.1131.27", "9.3.58046", "10.0.85385", "12.0.123217", "12.5.4.186049", "12.5.4.187298" ]
-VAR_VER_OS_IDENTIFIERS = [ "Windows Vista", "Windows Vista", "Windows 8", "Windows 8", "Windows 8", "Windows 8" ]
-
+VAR_VER_SUPP_CONFIG_NAMES = ["ADE 1.7.2", "ADE 2.0.1", "ADE 3.0.1", "ADE 4.0.3", "ADE 4.5.10", "ADE 4.5.11"]
+VAR_VER_SUPP_VERSIONS = ["ADE WIN 9,0,1131,27", "2.0.1.78765", "3.0.1.91394", "4.0.3.123281",
+                         "com.adobe.adobedigitaleditions.exe v4.5.10.186048",
+                         "com.adobe.adobedigitaleditions.exe v4.5.11.187303"]
+VAR_VER_HOBBES_VERSIONS = ["9.0.1131.27", "9.3.58046", "10.0.85385", "12.0.123217", "12.5.4.186049", "12.5.4.187298"]
+VAR_VER_OS_IDENTIFIERS = ["Windows Vista", "Windows Vista", "Windows 8", "Windows 8", "Windows 8", "Windows 8"]
 
 # "Missing" versions:
 # 1.7.1, 2.0, 3.0, 4.0, 4.0.1, 4.0.2, 4.5 to 4.5.9
@@ -72,14 +54,14 @@ VAR_VER_OS_IDENTIFIERS = [ "Windows Vista", "Windows Vista", "Windows 8", "Windo
 
 # This is a list of ALL versions we know (and can potentially use if present in a config file).
 # Must have the same length / size as the four lists above.
-VAR_VER_BUILD_IDS = [ 1131, 78765, 91394, 123281, 186048, 187303 ]
+VAR_VER_BUILD_IDS = [1131, 78765, 91394, 123281, 186048, 187303]
 # Build ID 185749 also exists, that's a different (older) variant of 4.5.10. 
 
 # This is a list of versions that can be used for new authorizations:
-VAR_VER_ALLOWED_BUILD_IDS_AUTHORIZE = [ 78765, 91394, 123281, 187303 ]
+VAR_VER_ALLOWED_BUILD_IDS_AUTHORIZE = [78765, 91394, 123281, 187303]
 
 # This is a list of versions to be displayed in the version changer.
-VAR_VER_ALLOWED_BUILD_IDS_SWITCH_TO = [ 1131, 78765, 91394, 123281, 187303 ]
+VAR_VER_ALLOWED_BUILD_IDS_SWITCH_TO = [1131, 78765, 91394, 123281, 187303]
 
 # Versions >= this one are using HTTPS
 # According to changelogs, this is implemented as of ADE 4.0.1 - no idea what build ID that is.
@@ -92,7 +74,6 @@ VAR_VER_USE_DIFFERENT_NOTIFICATION_XML_ORDER = 123281
 
 # Default build ID to use - ADE 2.0.1
 VAR_VER_DEFAULT_BUILD_ID = 78765
-
 
 
 def are_ade_version_lists_valid():
@@ -108,25 +89,28 @@ def are_ade_version_lists_valid():
         fail = True
     if len(VAR_VER_SUPP_CONFIG_NAMES) != len(VAR_VER_BUILD_IDS):
         fail = True
-    
+
     if fail:
         print("Internal error in ACSM Input: Mismatched version list lenghts.")
         print("This should never happen, please open a bug report.")
         return False
-    
+
     return True
 
 
 devkey_bytes = None
 
 
-
 def get_devkey_path():
     global FILE_DEVICEKEY
     return FILE_DEVICEKEY
+
+
 def get_device_path():
     global FILE_DEVICEXML
     return FILE_DEVICEXML
+
+
 def get_activation_xml_path():
     global FILE_ACTIVATIONXML
     return FILE_ACTIVATIONXML
@@ -153,7 +137,8 @@ def createDeviceKeyFile():
     f.write(devkey_bytes)
     f.close()
 
-def int_to_bytes(value, length, big_endian = True):
+
+def int_to_bytes(value, length, big_endian=True):
     # Helper function for Python2 only (big endian)
     # Python3 uses int.to_bytes()
     result = []
@@ -166,22 +151,20 @@ def int_to_bytes(value, length, big_endian = True):
 
     return result
 
-def get_mac_address(): 
+
+def get_mac_address():
     mac1 = getnode()
     mac2 = getnode()
     if (mac1 != mac2) or ((mac1 >> 40) % 2):
         if sys.version_info[0] >= 3:
             return bytes([1, 2, 3, 4, 5, 0])
-        else: 
+        else:
             return bytearray([1, 2, 3, 4, 5, 0])
-    
+
     if sys.version_info[0] >= 3:
         return mac1.to_bytes(6, byteorder='big')
 
     return int_to_bytes(mac1, 6)
-    
-
-
 
 
 def makeSerial(random):
@@ -194,33 +177,34 @@ def makeSerial(random):
 
     sha_out = None
 
-    if not random: 
+    if not random:
         try:
             # Linux
             uid = os.getuid()
             import pwd
             username = pwd.getpwuid(uid).pw_name.encode("utf-8").decode("latin-1")
-        except: 
+        except:
             # Windows
             uid = 1000
-            try: 
+            try:
                 username = os.getlogin().encode("utf-8").decode("latin-1")
-            except: 
+            except:
                 import getpass
                 username = getpass.getuser().encode("utf-8").decode("latin-1")
 
         mac_address = get_mac_address()
 
-        dataToHash = "%d:%s:%02x:%02x:%02x:%02x:%02x:%02x\x00" % (uid, username, 
-            mac_address[0], mac_address[1], mac_address[2], 
-            mac_address[3], mac_address[4], mac_address[5])
-            
+        dataToHash = "%d:%s:%02x:%02x:%02x:%02x:%02x:%02x\x00" % (uid, username,
+                                                                  mac_address[0], mac_address[1], mac_address[2],
+                                                                  mac_address[3], mac_address[4], mac_address[5])
+
         sha_out = hashlib.sha1(dataToHash.encode('latin-1')).hexdigest().lower()
-    else: 
+    else:
         import binascii
         sha_out = binascii.hexlify(Random.get_random_bytes(20)).lower()
 
     return sha_out
+
 
 def makeFingerprint(serial):
     # type: (str) -> str
@@ -230,7 +214,7 @@ def makeFingerprint(serial):
     # Fingerprint must be 20 bytes or less.
 
     global devkey_bytes
-    if devkey_bytes is None: 
+    if devkey_bytes is None:
         f = open(FILE_DEVICEKEY, "rb")
         devkey_bytes = f.read()
         f.close()
@@ -259,27 +243,70 @@ def sendHTTPRequest_DL2FILE(URL, outputfile):
 
     ret_code = handler.getcode()
 
-
     loc = None
-    try: 
+    try:
         loc = req.headers.get("Location")
     except:
         pass
 
-    if loc is not None: 
+    if loc is not None:
         return sendHTTPRequest_DL2FILE(loc)
 
     if ret_code != 200:
         return ret_code
 
     with open(outputfile, "wb") as f:
-        while True: 
+        while True:
             chunk = handler.read(chunksize)
-            if not chunk: 
+            if not chunk:
                 break
             f.write(chunk)
 
     return 200
+
+
+def sendHTTPRequest_FILE(URL):
+    # type: (str) -> (int,str)
+
+    headers = {
+        "Accept": "*/*",
+        "User-Agent": "book2png",
+        # MacOS uses different User-Agent. Good thing we're emulating a Windows client.
+    }
+    req = ulib.Request(url=URL, headers=headers)
+    handler = ulib.urlopen(req)
+
+    chunksize = 16 * 1024
+
+    ret_code = handler.getcode()
+
+    loc = None
+    try:
+        loc = req.headers.get("Location")
+    except:
+        pass
+
+    if loc is not None:
+        return sendHTTPRequest_FILE(loc)
+
+    if ret_code != 200:
+        return ret_code, None
+
+    fileData = handler.read(chunksize)
+
+    if not fileData:
+        return 500, None
+
+    fileData = bytearray(fileData)
+    while True:
+        chunk = handler.read(chunksize)
+        if not chunk:
+            break
+        fileData.extend(chunk)
+
+    return 200, fileData
+
+
 
 def sendHTTPRequest_getSimple(URL):
     # type: (str) -> str
@@ -304,17 +331,18 @@ def sendHTTPRequest_getSimple(URL):
     content = handler.read()
 
     loc = None
-    try: 
+    try:
         loc = req.headers.get("Location")
     except:
         pass
 
-    if loc is not None: 
+    if loc is not None:
         return sendHTTPRequest_getSimple(loc)
 
     return content
 
-def sendPOSTHTTPRequest(URL, document, type, returnRC = False):
+
+def sendPOSTHTTPRequest(URL, document, type, returnRC=False):
     # type: (str, bytes, str, bool) -> str
 
     headers = {
@@ -341,9 +369,9 @@ def sendPOSTHTTPRequest(URL, document, type, returnRC = False):
         URL = "http://" + URL
 
     req = ulib.Request(url=URL, headers=headers, data=document)
-    try: 
+    try:
         handler = ulib.urlopen(req, context=ctx)
-    except uliberror.HTTPError as err: 
+    except uliberror.HTTPError as err:
         # This happens with HTTP 500 and related errors.
         print("Post request caused HTTPError %d" % (err.code))
         if returnRC:
@@ -351,12 +379,12 @@ def sendPOSTHTTPRequest(URL, document, type, returnRC = False):
         else:
             return None
 
-    except uliberror.URLError as err: 
+    except uliberror.URLError as err:
         # This happens if the hostname cannot be resolved.
         print("Post request failed with URLError")
         if returnRC:
             return 900, "Post request failed with URLError"
-        else: 
+        else:
             return None
 
     ret_code = handler.getcode()
@@ -368,12 +396,12 @@ def sendPOSTHTTPRequest(URL, document, type, returnRC = False):
     content = handler.read()
 
     loc = None
-    try: 
+    try:
         loc = req.headers.get("Location")
     except:
         pass
 
-    if loc is not None: 
+    if loc is not None:
         return sendPOSTHTTPRequest(loc, document, type, returnRC)
 
     if returnRC:
@@ -391,21 +419,20 @@ def sendRequestDocu(document, URL):
     # type: (str, str) -> str
     return sendPOSTHTTPRequest(URL, document.encode("utf-8"), "application/vnd.adobe.adept+xml", False)
 
+
 def sendRequestDocuRC(document, URL):
     # type: (str, str) -> str
     return sendPOSTHTTPRequest(URL, document.encode("utf-8"), "application/vnd.adobe.adept+xml", True)
-
 
 
 ######### Encryption and signing ###################
 
 
 def encrypt_with_device_key(data):
-
     data = bytearray(data)
 
     global devkey_bytes
-    if devkey_bytes is None: 
+    if devkey_bytes is None:
         f = open(FILE_DEVICEKEY, "rb")
         devkey_bytes = f.read()
         f.close()
@@ -419,7 +446,6 @@ def encrypt_with_device_key(data):
 
     data = bytes(data)
 
-
     iv = Random.get_random_bytes(16)
     cip = AES.new(devkey_bytes, AES.MODE_CBC, iv)
     encrypted = cip.encrypt(data)
@@ -427,14 +453,14 @@ def encrypt_with_device_key(data):
     res = iv + encrypted
     return res
 
-def decrypt_with_device_key(data): 
 
+def decrypt_with_device_key(data):
     if isinstance(data, str):
         # Python2 
         data = bytes(data)
 
     global devkey_bytes
-    if devkey_bytes is None: 
+    if devkey_bytes is None:
         f = open(FILE_DEVICEKEY, "rb")
         devkey_bytes = f.read()
         f.close()
@@ -448,15 +474,14 @@ def decrypt_with_device_key(data):
     return decrypted
 
 
-def addNonce(): 
-
+def addNonce():
     # TODO: Update nonce calculation
     # Currently, the plugin always uses the current time, and the counter (tmp) is always 0. 
     # What Adobe does instead is save the current time on program start, then increase tmp
     # every time a Nonce is needed. 
 
     dt = datetime.utcnow()
-    sec = (dt - datetime(1970,1,1)).total_seconds()
+    sec = (dt - datetime(1970, 1, 1)).total_seconds()
     Ntime = int(sec * 1000)
     # Ntime is now milliseconds since 1970
 
@@ -474,7 +499,6 @@ def addNonce():
         final = bytearray(int_to_bytes(Ntime, 8, False))
         final.extend(int_to_bytes(tmp, 4, True))
 
-
     ret = ""
 
     ret += "<adept:nonce>%s</adept:nonce>" % (base64.b64encode(final).decode("utf-8"))
@@ -488,15 +512,11 @@ def addNonce():
 
 
 def get_cert_from_pkcs12(_pkcs12, _key):
-
     _, cert, _ = keys.parse_pkcs12(_pkcs12, _key)
     return dump_certificate(cert, encoding="der")
 
 
-
-
 def sign_node(node):
-
     sha_hash = hash_node(node)
     sha_hash = sha_hash.digest()
 
@@ -505,18 +525,18 @@ def sign_node(node):
     global devkey_bytes
     global pkcs12
 
-    if devkey_bytes is None: 
+    if devkey_bytes is None:
         f = open(FILE_DEVICEKEY, "rb")
         devkey_bytes = f.read()
         f.close()
 
     # Get private key
 
-    try: 
+    try:
         activationxml = etree.parse(FILE_ACTIVATIONXML)
         adNS = lambda tag: '{%s}%s' % ('http://ns.adobe.com/adept', tag)
         pkcs12 = activationxml.find("./%s/%s" % (adNS("credentials"), adNS("pkcs12"))).text
-    except: 
+    except:
         return None
 
     my_pkcs12 = base64.b64decode(pkcs12)
@@ -534,44 +554,39 @@ def sign_node(node):
     return signature
 
 
- 
-
 def hash_node(node):
-
     hash_ctx = SHA.new()
     hash_node_ctx(node, hash_ctx)
     return hash_ctx
 
 
-
 ASN_NONE = 0
-ASN_NS_TAG = 1      # aka "BEGIN_ELEMENT"
-ASN_CHILD = 2       # aka "END_ATTRIBUTES"
-ASN_END_TAG = 3     # aka "END_ELEMENT"
-ASN_TEXT = 4        # aka "TEXT_NODE"
-ASN_ATTRIBUTE = 5   # aka "ATTRIBUTE"
+ASN_NS_TAG = 1  # aka "BEGIN_ELEMENT"
+ASN_CHILD = 2  # aka "END_ATTRIBUTES"
+ASN_END_TAG = 3  # aka "END_ELEMENT"
+ASN_TEXT = 4  # aka "TEXT_NODE"
+ASN_ATTRIBUTE = 5  # aka "ATTRIBUTE"
 
 debug = False
 
-def hash_node_ctx(node, hash_ctx):
 
+def hash_node_ctx(node, hash_ctx):
     qtag = etree.QName(node.tag)
 
     if (qtag.localname == "hmac" or qtag.localname == "signature"):
         if (qtag.namespace == "http://ns.adobe.com/adept"):
             # Adobe HMAC and signature are not hashed
             return
-        else: 
+        else:
             print("Warning: Found hmac or signature node in unexpected namespace " + qtag.namespace)
 
     hash_do_append_tag(hash_ctx, ASN_NS_TAG)
 
-    if qtag.namespace is None: 
+    if qtag.namespace is None:
         hash_do_append_string(hash_ctx, "")
     else:
         hash_do_append_string(hash_ctx, qtag.namespace)
     hash_do_append_string(hash_ctx, qtag.localname)
-
 
     attrKeys = node.keys()
 
@@ -582,7 +597,7 @@ def hash_node_ctx(node, hash_ctx):
     # then by their names; sorting is done bytewise on UTF-8
     # representations."
 
-    for attribute in attrKeys: 
+    for attribute in attrKeys:
         # Hash all the attributes
         hash_do_append_tag(hash_ctx, ASN_ATTRIBUTE)
 
@@ -615,33 +630,30 @@ def hash_node_ctx(node, hash_ctx):
         if textlen > 0:
             done = 0
             remaining = 0
-            while True: 
+            while True:
                 remaining = textlen - done
                 if remaining > 0x7fff:
-                    #print("Warning: Why are we hashing a node larger than 32k?")
+                    # print("Warning: Why are we hashing a node larger than 32k?")
                     remaining = 0x7fff
 
                 hash_do_append_tag(hash_ctx, ASN_TEXT)
-                hash_do_append_string(hash_ctx, text[done:done+remaining]) 
+                hash_do_append_string(hash_ctx, text[done:done + remaining])
 
                 done += remaining
                 if done >= textlen:
                     break
 
-    for child in node: 
+    for child in node:
         # If there's child nodes, hash these as well.
         hash_node_ctx(child, hash_ctx)
 
-
-
     hash_do_append_tag(hash_ctx, ASN_END_TAG)
-
 
 
 def hash_do_append_string(hash_ctx, string):
     # type: (SHA.SHA1Hash, str) -> None
 
-    if sys.version_info[0] >= 3: 
+    if sys.version_info[0] >= 3:
         str_bytes = bytes(string, encoding="utf-8")
     else:
         str_bytes = bytes(string)
@@ -653,13 +665,15 @@ def hash_do_append_string(hash_ctx, string):
     hash_do_append_raw_bytes(hash_ctx, [len_upper, len_lower])
     hash_do_append_raw_bytes(hash_ctx, str_bytes)
 
+
 def hash_do_append_tag(hash_ctx, tag):
     # type: (SHA.SHA1Hash, int) -> None
 
     if (tag > 5):
         return
-    
+
     hash_do_append_raw_bytes(hash_ctx, [tag])
+
 
 def hash_do_append_raw_bytes(hash_ctx, data):
     # type: (SHA.SHA1Hash, bytes) -> None

@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
+name: Dan's Home Assistant add-on repository
+url: 'https://github.com/dan.bruno/home-assistant-addons'
+maintainer: Dan Bruno <home.assistant@danbruno.ca>
