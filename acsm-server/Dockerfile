@@ -14,8 +14,6 @@ ADD *.py /
 ADD run.sh /
 ADD calibre_plugin/*.py /calibre_plugin/
 
-WORKDIR /data
-
 RUN chmod a+x /run.sh
 
 CMD [ "/run.sh" ]
