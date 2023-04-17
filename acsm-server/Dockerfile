@@ -16,8 +16,6 @@ ADD calibre_plugin/*.py /calibre_plugin/
 
 WORKDIR /data
 
-# Copy root filesystem
-COPY rootfs /
 RUN chmod a+x /run.sh
 
 CMD [ "/run.sh" ]
