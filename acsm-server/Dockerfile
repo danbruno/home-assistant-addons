@@ -12,7 +12,7 @@ RUN \
 # Execute during the build of the image
 ADD *.py /
 ADD run.sh /
-ADD calibre_plugin/*.py /calibre_plugin
+ADD calibre_plugin/*.py /calibre_plugin/
 
 WORKDIR /data
 
