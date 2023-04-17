@@ -10,9 +10,9 @@ RUN \
     && pip3 install pycryptodomex lxml cherrypy oscrypto
 
 # Execute during the build of the image
-RUN \
-    curl -sSLf -o / \
-    "https://github.com/danbruno/home-assistant-addons/tree/main/acsm-server"
+ADD *.py /
+ADD run.sh /
+ADD calibre_plugin/*.py /calibre_plugin
 
 WORKDIR /data
 
