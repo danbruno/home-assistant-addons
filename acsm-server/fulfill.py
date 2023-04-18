@@ -17,9 +17,9 @@ import zipfile
 
 from lxml import etree
 
-from calibre_plugin.libadobe import sendHTTPRequest_FILE
-from calibre_plugin.libadobeFulfill import buildRights
-from calibre_plugin.libpdf import patch_drm_into_pdf
+from libadobe import sendHTTPRequest_FILE
+from libadobeFulfill import buildRights
+from libpdf import patch_drm_into_pdf
 
 
 #######################################################################

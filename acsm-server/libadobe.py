@@ -31,7 +31,7 @@ from lxml import etree
 from oscrypto import keys
 from oscrypto.asymmetric import dump_certificate, dump_private_key
 
-from calibre_plugin.customRSA import CustomRSA
+from customRSA import CustomRSA
 
 VAR_ACS_SERVER_HTTP = "http://adeactivate.adobe.com/adept"
 VAR_ACS_SERVER_HTTPS = "https://adeactivate.adobe.com/adept"

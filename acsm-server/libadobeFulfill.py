@@ -12,10 +12,10 @@ import base64
 import random
 import time
 
-from calibre_plugin.libadobe import addNonce, sign_node, get_cert_from_pkcs12, sendRequestDocu, sendRequestDocuRC, sendHTTPRequest
-from calibre_plugin.libadobe import get_devkey_path, get_device_path, get_activation_xml_path
-from calibre_plugin.libadobe import VAR_VER_SUPP_VERSIONS, VAR_VER_HOBBES_VERSIONS
-from calibre_plugin.libadobe import VAR_VER_BUILD_IDS, VAR_VER_USE_DIFFERENT_NOTIFICATION_XML_ORDER
+from libadobe import addNonce, sign_node, get_cert_from_pkcs12, sendRequestDocu, sendRequestDocuRC, sendHTTPRequest
+from libadobe import get_devkey_path, get_device_path, get_activation_xml_path
+from libadobe import VAR_VER_SUPP_VERSIONS, VAR_VER_HOBBES_VERSIONS
+from libadobe import VAR_VER_BUILD_IDS, VAR_VER_USE_DIFFERENT_NOTIFICATION_XML_ORDER
 
 
 def buildFulfillRequest(acsm):

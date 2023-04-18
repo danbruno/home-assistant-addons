@@ -1,12 +1,12 @@
 import cherrypy
 from lxml import etree
 
-import calibre_plugin.register_ADE_account
-from calibre_plugin.libadobeFulfill import fulfill
-from calibre_plugin.fulfill import download
+import register_ADE_account
+from libadobeFulfill import fulfill
+from fulfill import download
 
 
-class DownloadHandler(object):
+class Handler(object):
     @cherrypy.expose
     def download(self):
         if not cherrypy.request.process_request_body:
@@ -16,8 +16,6 @@ class DownloadHandler(object):
             )
 
         file = cherrypy.request.body.read()
-
-        print(len(file))
 
         if len(file) == 0:
             raise cherrypy.HTTPError(
@@ -58,37 +56,27 @@ class DownloadHandler(object):
 
         return filedata
 
-
-class RegisterHandler(object):
     @cherrypy.expose
     def register(self, username, password, version=0):
-        calibre_plugin.register_ADE_account.register(username, password, version)
+        register_ADE_account.register(username, password, version)
         return "Hit register stub"
 
-
-class CloneHandler(object):
     @cherrypy.expose
     def clone(self):
         # TODO: Take a zip file containing the three files and upload them to the config directory
         return "Hit clone stub"
 
-
-class AnonymousHandler(object):
     @cherrypy.expose
     def clone(self):
         # TODO: Make this throw an error if already registered and then upload to the config directory
-        calibre_plugin.register_ADE_account.register("", "", 0)
+        register_ADE_account.register("", "", 0)
         return "Hit anonymous stub"
 
-
-class ExportConfig(object):
     @cherrypy.expose
     def export(self):
         # TODO: Read all three files, zip them up, and return to the caller
         return "Hit export stub"
 
-
-class KeyHandler(object):
     @cherrypy.expose
     def exportKey(self):
         # TODO: Call export function, return to the browser
@@ -96,9 +84,4 @@ class KeyHandler(object):
 
 
 if __name__ == '__main__':
-    cherrypy.quickstart(DownloadHandler(), '/download')
-    cherrypy.quickstart(RegisterHandler(), '/register')
-    cherrypy.quickstart(CloneHandler(), '/clone')
-    cherrypy.quickstart(AnonymousHandler(), '/registerAnonymous')
-    cherrypy.quickstart(ExportConfig(), '/exportConfig')
-    cherrypy.quickstart(KeyHandler(), '/exportKey')
+    cherrypy.quickstart(Handler(), '/')
