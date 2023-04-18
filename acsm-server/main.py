@@ -67,7 +67,7 @@ class Handler(object):
         return "Hit clone stub"
 
     @cherrypy.expose
-    def clone(self):
+    def anonymousRegister(self):
         # TODO: Make this throw an error if already registered and then upload to the config directory
         register_ADE_account.register("", "", 0)
         return "Hit anonymous stub"
