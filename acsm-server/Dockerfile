@@ -12,7 +12,6 @@ RUN \
 # Execute during the build of the image
 ADD *.py /
 ADD run.sh /
-ADD calibre_plugin/*.py /calibre_plugin/
 
 RUN chmod a+x /run.sh
 
