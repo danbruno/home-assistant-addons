@@ -36,7 +36,7 @@ class Handler(object):
         if success is False:
             raise cherrypy.HTTPError(
                 400,
-                'Could not fulfill the request'
+                replyData
             )
 
         success, filedata, filename = download(replyData)
