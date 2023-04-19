@@ -13,6 +13,11 @@ RUN \
 ADD *.py /
 ADD run.sh /
 
+RUN sed -i '/^\default = default_sect/a legacy = legacy_sect' /etc/ssl/openssl.cnf
+RUN sed -i '/^\[default_sect\]/a activate = 1' /etc/ssl/openssl.cnf
+RUN echo "[legacy_sect]" >> /etc/ssl/openssl.cnf
+RUN echo "activate = 1" >> /etc/ssl/openssl.cnf
+
 RUN chmod a+x /run.sh
 
 CMD [ "/run.sh" ]
