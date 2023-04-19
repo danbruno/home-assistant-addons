@@ -147,7 +147,7 @@ def getDecryptedCert(pkcs12_b64_string=None):
     pkcs12_data = base64.b64decode(pkcs12_b64_string)
 
     try:
-        from calibre_plugin.libadobe import devkey_bytes as devkey_adobe
+        from libadobe import devkey_bytes as devkey_adobe
     except:
         pass
 
@@ -316,12 +316,6 @@ def buildRights(license_token_node):
 
 def fulfill(acsmxml, do_notify=False):
     verbose_logging = False
-    try:
-        import calibre_plugins.deacsm.prefs as prefs
-        deacsmprefs = prefs.ACSMInput_Prefs()
-        verbose_logging = deacsmprefs["detailed_logging"]
-    except:
-        pass
 
     # Get pkcs12: 
 
