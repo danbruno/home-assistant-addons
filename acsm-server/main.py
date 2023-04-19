@@ -4,6 +4,7 @@ from lxml import etree
 import register_ADE_account
 from libadobeFulfill import fulfill
 from fulfill import download
+from libadobe import CONFIG_DIRECTORY
 
 
 class Handler(object):
@@ -84,5 +85,9 @@ class Handler(object):
 
 
 if __name__ == '__main__':
+    from pathlib import Path
+
+    Path(CONFIG_DIRECTORY).mkdir(parents=True, exist_ok=True)
+
     cherrypy.config.update({'server.socket_host': '0.0.0.0'})
     cherrypy.quickstart(Handler(), '/')

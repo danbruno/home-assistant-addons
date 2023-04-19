@@ -36,9 +36,10 @@ from customRSA import CustomRSA
 VAR_ACS_SERVER_HTTP = "http://adeactivate.adobe.com/adept"
 VAR_ACS_SERVER_HTTPS = "https://adeactivate.adobe.com/adept"
 
-FILE_DEVICEKEY = "C:/docker/acsm-server/devicesalt"
-FILE_DEVICEXML = "C:/docker/acsm-server/device.xml"
-FILE_ACTIVATIONXML = "C:/docker/acsm-server/activation.xml"
+CONFIG_DIRECTORY = "/config/addons_config/acsm_server/"
+FILE_DEVICEKEY = CONFIG_DIRECTORY + "devicesalt"
+FILE_DEVICEXML = CONFIG_DIRECTORY + "device.xml"
+FILE_ACTIVATIONXML = CONFIG_DIRECTORY + "activation.xml"
 
 # Lists of different ADE "versions" we know about
 VAR_VER_SUPP_CONFIG_NAMES = ["ADE 1.7.2", "ADE 2.0.1", "ADE 3.0.1", "ADE 4.0.3", "ADE 4.5.10", "ADE 4.5.11"]
