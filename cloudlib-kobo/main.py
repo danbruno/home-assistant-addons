@@ -10,7 +10,7 @@ import acsmserver
 import connection
 import configparser
 
-local = True
+local = False
 
 CONFIG_DIRECTORY = "/config/addons_config/cloud-lib"
 TEMPLATE_DIRECTORY = "/templates"
