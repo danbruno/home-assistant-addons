@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Results</title>
+</head>
+<body>
+  <h1>Choose a saved user</h1>
+  {% for user in users %}
+       <div>
+	      <p>{{ user.alias}} ({{ user.login }}) at {{ user.url }}</p>
+          <a href="/login/{{ user.alias }}"/>Login</a>
+       </div>
+     {% endfor %}
+</body>
+</html>

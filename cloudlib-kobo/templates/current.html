@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Current</title>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+	   $(document).ready(function() {
+  $("button").click(function(e) {
+    e.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "/" + this.name + "/" + this.id,
+      success: function(result) {
+        location.reload();
+      },
+      error: function(result) {
+	    alert("Failed to execute action " + this.name);
+        location.reload();
+      }
+    });
+  });
+});
+  </script>
+</head>
+<body>
+  {% include "header.html" %}
+  <h1>Current Books: {{ patronItems|length }}</h1>
+
+  <div>
+     {% for item in patronItems %}
+       <div>
+          <div><a href="/detail/{{ item.itemId }}"/><img src="{{ item.imageLink }}"/></a></div>
+          <div><b>{{ item.title }}</b></div>
+          <div>{{ item.summary }}</div>
+             <div>
+                <form action="/download/{{ item.loanId }}.epub"><input type="submit" value="Download"></form>
+                <button id="{{ item.itemId }}" name="checkin">Return</button>
+             </div>
+          </div>
+       </div>
+     {% endfor %}
+   </div>
+</body>
+</html>

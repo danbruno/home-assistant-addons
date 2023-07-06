@@ -8,6 +8,9 @@
 /deps
 /releases
 /adobe_account_backup_*.zip
+
+/cloudlib-kobo/__pycache__
+
 .idea
 .vscode
 .devcontainer

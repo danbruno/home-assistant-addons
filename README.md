@@ -1,7 +1,6 @@
 # Dan's Home Assistant add-on repository
 
-This is a collection of home assistant add-ons. The only one for now is a helper add-on while researching some extensions to Kobo eReaders.
-This is not stable and should not be relied upon just yet.
+This is a collection of home assistant add-on to help support a better user experience on Kobos when reading from cloud library.
 
 Add-on documentation: <https://developers.home-assistant.io/docs/add-ons>
 
@@ -13,13 +12,25 @@ This repository contains the following add-ons
 
 ### [ACSM server](./acsm-server)
 
+_Webservice to convert ACSM files to DRMed ePUB for use in eReaders._
+
+
 ![Supports aarch64 Architecture][aarch64-shield]
 ![Supports amd64 Architecture][amd64-shield]
 ![Supports armhf Architecture][armhf-shield]
 ![Supports armv7 Architecture][armv7-shield]
 ![Supports i386 Architecture][i386-shield]
 
-_Webservice to convert ACSM files to DRMed ePUB for use in eReaders._
+
+### [Cloud-lib server](./cloudlib-kobo)
+
+_Webserver used to proxy requests to Cloud Library and automatically convert ACSM files to ePUBs_
+
+![Supports aarch64 Architecture][aarch64-shield]
+![Supports amd64 Architecture][amd64-shield]
+![Supports armhf Architecture][armhf-shield]
+![Supports armv7 Architecture][armv7-shield]
+![Supports i386 Architecture][i386-shield]
 
 <!--
 

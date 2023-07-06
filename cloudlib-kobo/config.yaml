@@ -1,0 +1,15 @@
+name: "Cloudlib Server"
+description: "Hosts a proxy to CloudLibrary"
+version: "0.0.1"
+slug: "cloudlib_server"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+ports:
+  8080/tcp: 8096
+map:
+  - "config:rw"

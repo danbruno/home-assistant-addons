@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Search Results</title>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+	   $(document).ready(function() {
+  $("button").click(function(e) {
+    e.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "/" + this.name + "/" + this.id,
+      success: function(result) {
+        location.reload();
+      },
+      error: function(result) {
+	    alert("Failed to execute action " + this.name);
+        location.reload();
+      }
+    });
+  });
+});
+  </script>
+</head>
+<body>
+  {% include "header.html" %}
+  <h1>Search Results: Found {{ totalBooks }}</h1>
+  <h2>Showing {{ segment }} of {{ totalSegments }}</h2>
+
+  <div>
+     {% for item in items %}
+       <div>
+          <div><a href="/detail/{{ item.documentId }}"/><img src="{{ item.imageLinkThumbnail }}"/></a></div>
+          <div><b>{{ item.title }}</b></div>
+          <div>{{ item.summary }}</div>
+		  <div>
+	         {% if item.canBorrow %}
+	            <button>Borrow</button>
+	         {% elif item.canHold %}
+	            <button>Hold</button>
+	         {% endif %}
+			 {% if item.canSave %}
+	            <button>Save</button>
+			 {% endif %}
+	      </div>
+       </div>
+     {% endfor %}
+   </div>
+</body>
+</html>

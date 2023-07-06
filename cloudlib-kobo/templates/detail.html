@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Results</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+	   $(document).ready(function() {
+  $("button").click(function(e) {
+    e.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "/" + this.name + "/" + this.id,
+      success: function(result) {
+        location.reload();
+      },
+      error: function(result) {
+	    alert("Failed to execute action " + this.name);
+        location.reload();
+      }
+    });
+  });
+});
+	</script>
+</head>
+<body>
+  {% include "header.html" %}
+   <div>
+       <div><img src="{{ imageLink }}"/></div>
+       <div><b>{{ title }}</b></div>
+       <div>{{ description }}</div>
+	   <div>
+	   {% if canRead %}
+	      <form action="/download/{{ loanId }}.epub"><input type="submit" value="Download"></form>
+		  <button id="{{ itemId }}" name="checkin">Return</button>
+	   {% elif canBorrow %}
+	      <button id="{{ itemId }}" name="checkout">Borrow</button>
+	   {% elif canHold %}
+	      <button id="{{ itemId }}" name="hold">Hold</button>
+	   {% endif %}
+	   {% if canSave %}
+		  <button id="{{ itemId }}" name="save">Save</button>
+	   {% endif %}
+	   </div>
+   </div>
+</body>
+</html>
