@@ -13,7 +13,7 @@ RUN mkdir -p /templates
 
 # Execute during the build of the image
 ADD *.py /
-ADD *.html /templates
+ADD templates/*.html /templates
 ADD run.sh /
 
 RUN sed -i '/^default = default_sect/a legacy = legacy_sect' /etc/ssl/openssl.cnf

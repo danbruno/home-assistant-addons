@@ -12,7 +12,7 @@ import configparser
 
 local = True
 
-CONFIG_DIRECTORY = "/config/addons_config/cloudlib-kobo/"
+CONFIG_DIRECTORY = "/config/addons_config/cloud-lib"
 TEMPLATE_DIRECTORY = "/templates"
 
 
