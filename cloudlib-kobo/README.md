@@ -1,4 +1,4 @@
-# ACSM Server Home Assistant Add-on
+# Cloud-Lib Server Home Assistant Add-on
 
 This is home assistant add-on that hosts a proxy to cloud library and utilizes the ACSM server to convert the ACSM file to epub directly when downloading for offline reading.
 The motivation for this is that cloud library only supports downloading ACSM files which need to be connected to Adobe Digital Editions and then transferred over USB to your eReader.
