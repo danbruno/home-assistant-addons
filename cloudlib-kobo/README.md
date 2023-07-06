@@ -34,7 +34,7 @@ See the "LICENSE" file for a full copy of the GNU GPL v3.
 ## Setup
 
 - Add the repository to your Home Assistant instance. Install the add-on and configure the port so it doesn't conflict.
-- Add a config.cfg file to your addons config directory in a folder called /config/addons_config/cloudlib-kobo/
+- Add a config.cfg file to your addons config directory in a folder called /config/addons_config/cloud-lib/
 
 It should look like this:
 [General]
