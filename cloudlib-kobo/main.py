@@ -12,7 +12,7 @@ import configparser
 
 local = False
 
-CONFIG_DIRECTORY = "/config/addons_config/cloud-lib"
+CONFIG_DIRECTORY = "/config/addons_config/cloud-lib/"
 TEMPLATE_DIRECTORY = "/templates"
 
 
