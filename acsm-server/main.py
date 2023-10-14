@@ -5,7 +5,7 @@ import register_ADE_account
 from libadobeFulfill import fulfill
 from fulfill import download
 from libadobe import CONFIG_DIRECTORY
-
+from inetepub import decryptBook
 
 class Handler(object):
     @cherrypy.expose
@@ -58,6 +58,63 @@ class Handler(object):
         return filedata
 
     @cherrypy.expose
+    def downloadDrmFree(self):
+        if not cherrypy.request.process_request_body:
+            raise cherrypy.HTTPError(
+                400,
+                'Only PUT or POST are supported'
+            )
+
+        file = cherrypy.request.body.read()
+
+        if len(file) == 0:
+            raise cherrypy.HTTPError(
+                400,
+                'Please provide an ACSM file'
+            )
+
+        try:
+            acsmxml = etree.fromstring(file)
+        except:
+            raise cherrypy.HTTPError(
+                400,
+                'Please provide a valid ACSM file'
+            )
+
+        success, replyData = fulfill(acsmxml)
+
+        if success is False:
+            raise cherrypy.HTTPError(
+                400,
+                replyData
+            )
+
+        success, filedata, filename = download(replyData)
+
+        if success is False:
+            raise cherrypy.HTTPError(
+                400,
+                'Could not download the file'
+            )
+
+        filedata = decryptBook(filedata)
+
+        if filedata is None:
+            raise cherrypy.HTTPError(
+                500,
+                'Failed to decrypt ' + filename
+            )
+
+        if filename.endswith("epub"):
+            cherrypy.response.headers['content-type'] = 'application/epub+zip'
+        else:
+            cherrypy.response.headers['content-type'] = 'application/pdf'
+
+        cherrypy.response.headers['content-disposition'] = 'attachment; filename=' + filename
+
+        return filedata
+
+    @cherrypy.expose
     def register(self, username, password, version=0):
         register_ADE_account.register(username, password, version)
         return "Hit register stub"
@@ -82,6 +139,8 @@ class Handler(object):
     def exportKey(self):
         # TODO: Call export function, return to the browser
         return "Hit export key stub"
+
+
 
 
 if __name__ == '__main__':

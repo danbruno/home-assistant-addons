@@ -61,14 +61,6 @@ Note: You can only return books that you downloaded with version 0.0.9 (or newer
 ## To-Do list for the future?
 
 - Support for returning a book
+- Support for decrypting with multiple accounts
 - ...
-- Support to copy an authorization from the plugin to an ADE install
-- Support for multiple independant authorizations (with an easy way to switch between them)
-- Import a JoinedAccount authorization from ADE (ADE2.0+)
-- Import multiple account authorizations from ADE (ADE2.0+)
-- Support to add an AdobeID to an eReader without replacing the existing one
-- Support for Adobe's "auth" download method instead of the "simple" method (ADE2.0+)
-- Support the JoinAccounts, ActivateLinkedAccounts and GetCredentialList functions to allow for merged AdobeIDs (ADE2.0+)
-- Support the SyncToDevice function to auto-download new books from ADE into Calibre (ADE4.0+)
-- Add small link in settings window that will open a popup with all the expert stuff like de-auth and account joining.
-- ...
+

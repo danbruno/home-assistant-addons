@@ -37,9 +37,11 @@ See the "LICENSE" file for a full copy of the GNU GPL v3.
 - Add a config.cfg file to your addons config directory in a folder called /config/addons_config/cloud-lib/
 
 It should look like this:
+
+```
 [General]
 acsmserver=http://...
-
+```
 
 IMPORTANT: 
 
