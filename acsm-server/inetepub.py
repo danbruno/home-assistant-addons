@@ -232,6 +232,8 @@ def decryptBook(filedata):
     adept = lambda tag: '{%s}%s' % (NSMAP['adept'], tag)
     expr = '//%s/%s' % (adept('credentials'), adept('privateLicenseKey'))
     userkey = tree.findtext(expr)
+    userkey = base64.b64decode(userkey)
+    userkey = userkey[26:]
 
     with closing(ZipFile(io.BytesIO(filedata))) as inf:
         namelist = inf.namelist()
