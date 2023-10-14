@@ -40,8 +40,10 @@ It should look like this:
 
 ```
 [General]
-acsmserver=http://...
+acsmserver=http://hostname.local:port
 ```
+
+Do not use any trailing slash.
 
 IMPORTANT: 
 

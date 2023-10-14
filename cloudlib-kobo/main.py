@@ -117,7 +117,25 @@ class Handler(object):
         rpc_url = cherrypy.session.get("rpcurl")
         reaktor = cherrypy.session.get("reaktor")
         acsm = book.downloadACSM(cookies, rpc_url, reaktor, loanId)
-        response = acsmserver.convert(CONVERSION_ENDPOINT, acsm)
+        response = acsmserver.convert(CONVERSION_ENDPOINT + '/download', acsm)
+        cherrypy.response.headers['Content-Disposition'] = response.headers['Content-Disposition']
+        cherrypy.response.headers['Content-Type'] = response.headers['Content-Type']
+        cherrypy.response.headers['Content-Length'] = response.headers['Content-Length']
+        return response.content
+
+    @cherrypy.expose
+    def downloadDrmFree(self, loanId):
+        self.checkAuth()
+
+        # Kobo is weird and won't download a file unless the URI ends in .epub even if the Content-Disposition is set
+        if loanId.endswith('.epub'):
+            loanId = loanId[0:-5]
+
+        cookies = cherrypy.session.get("auth")
+        rpc_url = cherrypy.session.get("rpcurl")
+        reaktor = cherrypy.session.get("reaktor")
+        acsm = book.downloadACSM(cookies, rpc_url, reaktor, loanId)
+        response = acsmserver.convert(CONVERSION_ENDPOINT + '/downloadDrmFree', acsm)
         cherrypy.response.headers['Content-Disposition'] = response.headers['Content-Disposition']
         cherrypy.response.headers['Content-Type'] = response.headers['Content-Type']
         cherrypy.response.headers['Content-Length'] = response.headers['Content-Length']

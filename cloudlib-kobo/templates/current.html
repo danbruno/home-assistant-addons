@@ -35,6 +35,7 @@
           <div>{{ item.summary }}</div>
              <div>
                 <form action="/download/{{ item.loanId }}.epub"><input type="submit" value="Download"></form>
+                <form action="/downloadDrmFree/{{ item.loanId }}.epub"><input type="submit" value="Download for Kindle"></form>
                 <button id="{{ item.itemId }}" name="checkin">Return</button>
              </div>
           </div>

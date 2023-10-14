@@ -32,6 +32,7 @@
 	   <div>
 	   {% if canRead %}
 	      <form action="/download/{{ loanId }}.epub"><input type="submit" value="Download"></form>
+		   <form action="/downloadDrmFree/{{ loanId }}.epub"><input type="submit" value="Download For Kindle"></form>
 		  <button id="{{ itemId }}" name="checkin">Return</button>
 	   {% elif canBorrow %}
 	      <button id="{{ itemId }}" name="checkout">Borrow</button>
