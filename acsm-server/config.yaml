@@ -1,6 +1,6 @@
 name: "ACSM Server"
 description: "Downloads ePUB files from ACSM files"
-version: "0.0.4"
+version: "0.0.5"
 slug: "acsm_server"
 init: false
 arch:
