@@ -30,5 +30,6 @@ def post(cookies, url, path, route):
     payload = {"format": "", "sort": "BorrowedDateDescending"}
     print(total + " " + json.dumps(payload))
     response = requests.post(total, cookies=cookies, verify=False, data=payload)
-    print(response.text)
+    print(str(response.status_code))
+    print(response.content)
     return response.json()
