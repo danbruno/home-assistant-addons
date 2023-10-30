@@ -67,9 +67,8 @@ class Handler(object):
         conn = connection.getConnection()
         u = user.read_user(conn, alias)
         url = u["url"]
-
-        response = authentication.login(url, u["login"],
-                                        u["password"])
+        library = url.rsplit('/', 1)[1]
+        response = authentication.login('https://ebook.yourcloudlibrary.com', library, u["login"], u["password"])
         print(response.cookies)
         cookies = response.cookies
 
