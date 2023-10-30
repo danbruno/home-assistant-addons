@@ -26,8 +26,8 @@ def cancelHold(cookies, url, bookId):
     return get(cookies, url, f"/detail/{bookId}?action=remove&itemId={bookId}&", "routes/library.$name.detail.$id")["book"]
 
 def listCheckedOut(cookies, url):
-    return post(cookies, url, f"/mybooks/current?", "routes/library/$name/mybooks/current")["patronItems"]
+    return post(cookies, url, f"/mybooks/current?", "routes/library.$name.mybooks.current")["patronItems"]
 
 def listHolds(cookies, url):
-    return get(cookies, url, f"/mybooks/holds?", "routes/library/$name/mybooks/holds")["patronItems"]
+    return get(cookies, url, f"/mybooks/holds?", "routes/library.$name.mybooks.holds")["patronItems"]
 

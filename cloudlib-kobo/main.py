@@ -75,10 +75,12 @@ class Handler(object):
         cherrypy.session["auth"] = cookies
         cherrypy.session["url"] = url
 
-        config = user.getConfig(cookies, url)
+        userconfig = user.getConfig(cookies, url)
 
-        cherrypy.session["rpcurl"] = config["RPC_DOMAIN_PUBLIC"]
-        cherrypy.session["reaktor"] = config["reaktor"]
+        print(userconfig)
+
+        cherrypy.session["rpcurl"] = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
+        cherrypy.session["reaktor"] = userconfig["reaktor"]
 
         raise cherrypy.HTTPRedirect("/")
 
