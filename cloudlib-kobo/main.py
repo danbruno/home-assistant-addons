@@ -71,6 +71,9 @@ class Handler(object):
         response = authentication.login('https://ebook.yourcloudlibrary.com/', lib, u["login"], u["password"])
         print(response.cookies)
         cookies = response.cookies
+        response = authentication.login('https://ebook.yourcloudlibrary.com/', lib, u["login"], u["password"], cookies)
+        print(response.cookies)
+        cookies = response.cookies
 
         cherrypy.session["auth"] = cookies
         cherrypy.session["url"] = url
