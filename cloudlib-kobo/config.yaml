@@ -1,6 +1,6 @@
 name: "Cloudlib Server"
 description: "Hosts a proxy to CloudLibrary"
-version: "0.0.15"
+version: "0.0.16"
 slug: "cloudlib_server"
 init: false
 arch:
