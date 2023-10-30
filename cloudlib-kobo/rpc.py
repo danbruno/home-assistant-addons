@@ -28,7 +28,7 @@ def post(cookies, url, path, route):
     _data = urllib.parse.quote(route, safe="")
     total = url + f"{path}_data={_data}"
     payload = {"format": "", "sort": "BorrowedDateDescending"}
-    print(total + " " + payload + " " + cookies)
+    print(total + " " + json.dumps(payload) + " " + json.dumps(cookies))
     response = requests.post(total, cookies=cookies, verify=False, data=payload)
     print(response.text)
     return response.json()
