@@ -70,6 +70,7 @@ class Handler(object):
 
         response = authentication.login(url, u["login"],
                                         u["password"])
+        print(response.cookies)
         cookies = response.cookies
 
         cherrypy.session["auth"] = cookies

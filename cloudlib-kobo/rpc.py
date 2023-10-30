@@ -29,6 +29,7 @@ def post(cookies, url, path, route):
     total = url + f"{path}_data={_data}"
     payload = {}
     print(total + " " + json.dumps(payload))
+    print(cookies)
     response = requests.post(total, cookies=cookies, verify=False, data=payload)
     print(str(response.status_code))
     print(response.content)
