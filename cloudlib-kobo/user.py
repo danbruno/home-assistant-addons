@@ -1,7 +1,7 @@
 from rpc import post
 
 def getConfig(cookies, url):
-    return post(cookies, url, f"/mybooks/current?", "routes/library/$name/mybooks/current")
+    return post(cookies, url, f"/mybooks/current?", "routes/library.$name.mybooks.current")
 
 def save_user(conn, alias, login, password, url):
     conn.execute("INSERT into users (id, alias, login, password, url) VALUES(?, ?, ?, ?, ?)", (None, alias, login, password, url))
