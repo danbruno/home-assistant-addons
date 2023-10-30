@@ -15,7 +15,6 @@ local = False
 CONFIG_DIRECTORY = "/config/addons_config/cloud-lib/"
 TEMPLATE_DIRECTORY = "/templates"
 
-
 if local:
     CONFIG_DIRECTORY = "c:/cloudlib/"
     TEMPLATE_DIRECTORY = "c:/cloudlib/templates"
@@ -29,6 +28,7 @@ config.read(CONFIG_DIRECTORY + "config.cfg")
 
 CONVERSION_ENDPOINT = config.get('General', 'acsmserver')
 
+
 class Handler(object):
     def checkAuth(self):
         cookies = cherrypy.session.get("auth")
@@ -38,23 +38,23 @@ class Handler(object):
     @cherrypy.tools.jinja2(template="index.html")
     @cherrypy.expose
     def index(self):
-      cookies = cherrypy.session.get("auth")
-      if cookies is None:
-          users = user.read_all_users(connection.getConnection())
+        cookies = cherrypy.session.get("auth")
+        if cookies is None:
+            users = user.read_all_users(connection.getConnection())
 
-          if len(users) == 0:
-            raise cherrypy.HTTPRedirect("/signup")
-          else:
-            raise cherrypy.HTTPRedirect("/choose")
+            if len(users) == 0:
+                raise cherrypy.HTTPRedirect("/signup")
+            else:
+                raise cherrypy.HTTPRedirect("/choose")
 
-      return {}
+        return {}
 
     @cherrypy.tools.jinja2(template="choose.html")
     @cherrypy.expose
     def choose(self):
         conn = connection.getConnection()
         users = user.read_all_users(conn)
-        return { "users" : users }
+        return {"users": users}
 
     @cherrypy.tools.jinja2(template="signup.html")
     @cherrypy.expose
@@ -75,13 +75,6 @@ class Handler(object):
         cherrypy.session["auth"] = cookies
         cherrypy.session["url"] = url
 
-        userconfig = user.getConfig(cookies, url)
-
-        print(userconfig)
-
-        cherrypy.session["rpcurl"] = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
-        cherrypy.session["reaktor"] = userconfig["reaktor"]
-
         raise cherrypy.HTTPRedirect("/")
 
     @cherrypy.tools.jinja2(template="current.html")
@@ -91,7 +84,7 @@ class Handler(object):
         cookies = cherrypy.session.get("auth")
         url = cherrypy.session.get("url")
         patronItems = book.listCheckedOut(cookies, url)
-        return {"patronItems" : patronItems}
+        return {"patronItems": patronItems}
 
     @cherrypy.expose
     def checkout(self, id):
@@ -116,8 +109,12 @@ class Handler(object):
             loanId = loanId[0:-5]
 
         cookies = cherrypy.session.get("auth")
-        rpc_url = cherrypy.session.get("rpcurl")
-        reaktor = cherrypy.session.get("reaktor")
+        url = cherrypy.session.get("url")
+
+        userconfig = user.getConfig(cookies, url)["reaktor"]
+        rpc_url = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
+        reaktor = user.config["reaktor"]
+
         acsm = book.downloadACSM(cookies, rpc_url, reaktor, loanId)
         response = acsmserver.convert(CONVERSION_ENDPOINT + '/download', acsm)
         cherrypy.response.headers['Content-Disposition'] = response.headers['Content-Disposition']
@@ -158,7 +155,9 @@ class Handler(object):
         cookies = cherrypy.session.get("auth")
         url = cherrypy.session.get("url")
         search = book.search(cookies, url, query, segment)
-        return {"totalBooks" : search["totalItems"], "segment" : segment, "totalSegments" : search["totalSegments"], "items" : search["items"]}
+        return {"totalBooks": search["totalItems"], "segment": segment, "totalSegments": search["totalSegments"],
+                "items": search["items"]}
+
 
 if __name__ == '__main__':
     from pathlib import Path
@@ -166,7 +165,6 @@ if __name__ == '__main__':
     Path(CONFIG_DIRECTORY).mkdir(parents=True, exist_ok=True)
     Path(SESSION_DIRECTORY).mkdir(parents=True, exist_ok=True)
     Path(STATIC_DIRECTORY).mkdir(parents=True, exist_ok=True)
-
 
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
                             'tools.sessions.on': True,
