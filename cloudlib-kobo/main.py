@@ -75,6 +75,13 @@ class Handler(object):
         cherrypy.session["auth"] = cookies
         cherrypy.session["url"] = url
 
+        userconfig = user.getConfig(cookies, url)
+
+        print(userconfig)
+
+        cherrypy.session["rpcurl"] = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
+        cherrypy.session["reaktor"] = userconfig.get("reaktor")
+
         raise cherrypy.HTTPRedirect("/")
 
     @cherrypy.tools.jinja2(template="current.html")
@@ -115,6 +122,7 @@ class Handler(object):
         rpc_url = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
         reaktor = user.config["reaktor"]
 
+      #  reaktor = cherrypy.session.get("reaktor")
         acsm = book.downloadACSM(cookies, rpc_url, reaktor, loanId)
         response = acsmserver.convert(CONVERSION_ENDPOINT + '/download', acsm)
         cherrypy.response.headers['Content-Disposition'] = response.headers['Content-Disposition']
