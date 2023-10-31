@@ -27,10 +27,8 @@ def get(cookies, url, path, route):
 def post(cookies, url, path, route):
     _data = urllib.parse.quote(route, safe="")
     total = url + f"{path}_data={_data}"
-    payload = {}
+    payload = {"format": "", "sort": "BorrowedDateDescending"}
     print(total + " " + json.dumps(payload))
-    print(cookies)
     response = requests.post(total, cookies=cookies, verify=False, data=payload)
     print(str(response.status_code))
-    print(response.content)
     return response.json()
