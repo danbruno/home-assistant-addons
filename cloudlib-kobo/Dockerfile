@@ -6,11 +6,11 @@ FROM $BUILD_FROM
 # Install requirements for add-on
 RUN \
   apk add --no-cache \
-    python3 py3-pip \
-    py3-cherrypy py3-cherrypy_jinja2 py3-configparser py3-requests
+    python3 py3-pip
+#    && pip3 install cherrypy cherrypy_jinja2 configparser requests
 
-#RUN \
-#    pip3 install cherrypy cherrypy_jinja2 configparser requests
+RUN \
+    pip install cherrypy cherrypy_jinja2 configparser requests
 
 RUN mkdir -p /templates
 
