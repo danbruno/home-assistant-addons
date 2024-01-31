@@ -123,7 +123,7 @@ class Handler(object):
 
         userconfig = user.getConfig(cookies, url)
         rpc_url = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
-        reaktor = userconfig.config["reaktor"]
+        reaktor = userconfig.get["reaktor"]
 
       #  reaktor = cherrypy.session.get("reaktor")
         acsm = book.downloadACSM(cookies, rpc_url, reaktor, loanId)
