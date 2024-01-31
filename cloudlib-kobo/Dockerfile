@@ -9,7 +9,7 @@ ENV PIP_BREAK_SYSTEM_PACKAGES=1
 # Install requirements for add-on
 RUN \
   apk add --no-cache \
-    python3 py3-pip
+    python3 py3-pip \
     && pip3 install cherrypy cherrypy_jinja2 configparser requests
 
 RUN mkdir -p /templates
