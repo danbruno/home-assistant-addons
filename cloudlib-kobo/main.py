@@ -121,9 +121,9 @@ class Handler(object):
         cookies = cherrypy.session.get("auth")
         url = cherrypy.session.get("url")
 
-        userconfig = user.getConfig(cookies, url)["reaktor"]
+        userconfig = user.getConfig(cookies, url)
         rpc_url = userconfig.get("RPC_DOMAIN_PUBLIC", "https://service.yourcloudlibrary.com")
-        reaktor = user.config["reaktor"]
+        reaktor = userconfig.config["reaktor"]
 
       #  reaktor = cherrypy.session.get("reaktor")
         acsm = book.downloadACSM(cookies, rpc_url, reaktor, loanId)
