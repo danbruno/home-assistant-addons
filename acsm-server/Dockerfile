@@ -3,6 +3,9 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
+# Install Python packages on system level
+ENV PIP_BREAK_SYSTEM_PACKAGES=1
+
 # Install requirements for add-on
 RUN \
   apk add --no-cache \
