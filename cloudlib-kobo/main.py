@@ -10,7 +10,7 @@ import acsmserver
 import connection
 import configparser
 
-local = False
+local = True
 
 CONFIG_DIRECTORY = "/config/addons_config/cloud-lib/"
 TEMPLATE_DIRECTORY = "/templates"
@@ -68,12 +68,14 @@ class Handler(object):
         u = user.read_user(conn, alias)
         url = u["url"]
         lib = url.rsplit('/', 1)[1]
-        response = authentication.login('https://ebook.yourcloudlibrary.com/', lib, u["login"], u["password"], None)
+        response = authentication.populateConfigProdCookie(lib)
+        cookies = response.cookies
+        response = authentication.login(lib, u["login"], u["password"], cookies)
         print(response.cookies)
         cookies = response.cookies
-        response = authentication.login('https://ebook.yourcloudlibrary.com/', lib, u["login"], u["password"], cookies)
-        print(response.cookies)
-        cookies = response.cookies
+#        response = authentication.login(lib, u["login"], u["password"], cookies)
+#        print(response.cookies)
+#        cookies = response.cookies
 
         cherrypy.session["auth"] = cookies
         cherrypy.session["url"] = url
@@ -175,6 +177,7 @@ if __name__ == '__main__':
 
     Path(CONFIG_DIRECTORY).mkdir(parents=True, exist_ok=True)
     Path(SESSION_DIRECTORY).mkdir(parents=True, exist_ok=True)
+
     Path(STATIC_DIRECTORY).mkdir(parents=True, exist_ok=True)
 
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
